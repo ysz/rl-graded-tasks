@@ -1,6 +1,9 @@
-from typing import Any, Callable, TypedDict
 import json
 import math
+from contextlib import redirect_stdout
+from io import StringIO
+from typing import Any, Callable, TypedDict
+
 from anthropic import Anthropic
 from anthropic.types import MessageParam, ToolUnionParam
 
@@ -38,9 +41,12 @@ def python_expression_tool(expression: str) -> PythonExpressionToolResult:
             "dict": dict,
             "tuple": tuple,
             "set": set,
+            "print": print,
         }
-        result = eval(expression, safe_globals, {})
-        return {"result": result, "error": None}
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            exec(expression, safe_globals, {})
+        return {"result": stdout.getvalue(), "error": None}
     except KeyboardInterrupt:
         raise
     except Exception as e:
@@ -114,7 +120,18 @@ def run_agent_loop(
                         assert (
                             isinstance(tool_input, dict) and "expression" in tool_input
                         )
+                        if verbose:
+                            print("\nInput:")
+                            print("```")
+                            for line in tool_input["expression"].split("\n"):
+                                print(f"{line}")
+                            print("```")
                         result = handler(tool_input["expression"])
+                        if verbose:
+                            print("\nOutput:")
+                            print("```")
+                            print(result)
+                            print("```")
                     elif tool_name == "submit_answer":
                         assert isinstance(tool_input, dict) and "answer" in tool_input
                         result = handler(tool_input["answer"])
@@ -167,7 +184,7 @@ def main():
                 "properties": {
                     "expression": {
                         "type": "string",
-                        "description": "Will be passed to eval()",
+                        "description": "Will be passed to exec(). Use print() to output something. Returns stdout. ",
                     }
                 },
                 "required": ["expression"],
@@ -217,7 +234,7 @@ def main():
     # Calculate and display pass rate
     pass_rate = (successes / num_runs) * 100
     print(f"\n{'=' * 60}")
-    print(f"Test Results:")
+    print("Test Results:")
     print(f"  Passed: {successes}/{num_runs}")
     print(f"  Failed: {num_runs - successes}/{num_runs}")
     print(f"  Pass Rate: {pass_rate:.1f}%")
