@@ -6,4 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.67.0",
+    "duckdb>=1.0",
+    "jsonschema>=4.21",
+    "pydantic>=2.8",
+    "pytest>=8.2",
+    "tabulate>=0.9",
 ]

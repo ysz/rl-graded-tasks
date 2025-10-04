@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Collapse separators",
+    "input": "Config -- Reload",
+    "expected": "config-reload"
+  },
+  {
+    "title": "Trim hyphens",
+    "input": "--Dash--",
+    "expected": "dash"
+  },
+  {
+    "title": "Lowercase and hyphenate",
+    "input": "Deploy Now",
+    "expected": "deploy-now"
+  }
+]

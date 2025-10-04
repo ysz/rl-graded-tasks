@@ -8,3 +8,19 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Tool caches and sandboxes
+.tmp_sandbox/
+.uv_cache/
+.uv-cache/
+.uv_data/
+.uv_home/
+.pytest_cache/
+
+# macOS leftovers
+.DS_Store
+._*
+
+# Local developer config
+.env
+.python-version
