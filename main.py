@@ -54,6 +54,7 @@ def python_expression_tool(expression: str) -> PythonExpressionToolResult:
             "tuple": tuple,
             "set": set,
             "print": print,
+            "sorted": sorted,
         }
         stdout = StringIO()
         with redirect_stdout(stdout):
