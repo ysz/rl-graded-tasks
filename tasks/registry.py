@@ -49,8 +49,8 @@ TASK_REGISTRY: Dict[str, TaskSpec] = {
         build_instance=fs_build_instance,
         grade=fs_grade,
         tools=("glob_find", "grep_search", "file_read"),
-        max_steps=5,
-        max_tokens=500,
+        max_steps=8,
+        max_tokens=600,
     ),
     "swe_slugify_fix": TaskSpec(
         name="swe_slugify_fix",
