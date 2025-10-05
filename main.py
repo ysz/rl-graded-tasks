@@ -158,7 +158,7 @@ def run_agent_loop(
         The submitted answer if submit_answer was called, otherwise None.
         When capture_usage is True, returns a tuple of (answer, usage_dict).
     """
-    client = Anthropic()
+    client = Anthropic(timeout=30.0, max_retries=2)
     messages: list[MessageParam] = [{"role": "user", "content": prompt}]
     last_usage: dict[str, int | None] | None = None
 
@@ -194,6 +194,12 @@ def run_agent_loop(
                         f"{delay} seconds (attempt {attempt + 2}/3)."
                     )
                 time.sleep(delay)
+            except Exception as e:
+                if verbose:
+                    print(f"API error on attempt {attempt + 1}: {type(e).__name__}: {str(e)[:100]}")
+                if attempt == 2:
+                    raise
+                time.sleep(2 ** attempt)
         if response is None:
             raise RuntimeError("Anthropic API did not return a response")
         usage_info = _usage_to_dict(getattr(response, "usage", None))

@@ -12,49 +12,91 @@ _FIXTURE_DIR = Path(__file__).parent / "fixture"
 _VARIANTS: Dict[int, List[Dict[str, object]]] = {
     1: [
         {
-            "title": "Deep merge with overrides",
-            "base": {"app": {"host": "localhost", "port": 8000}},
-            "patch": {"app": {"port": 9000, "debug": True}},
-            "expected": {"app": {"host": "localhost", "port": 9000, "debug": True}},
+            "title": "Nested merge with partial override",
+            "base": {"config": {"db": {"host": "localhost", "port": 5432}}},
+            "patch": {"config": {"db": {"port": 3306}}},
+            "expected": {"config": {"db": {"host": "localhost", "port": 3306}}},
         },
         {
-            "title": "List replacement",
-            "base": {"plugins": ["auth", "cache"]},
-            "patch": {"plugins": ["auth", "metrics"]},
-            "expected": {"plugins": ["auth", "metrics"]},
+            "title": "Multiple branches",
+            "base": {
+                "services": {
+                    "api": {"host": "localhost"},
+                    "worker": {"threads": 4},
+                }
+            },
+            "patch": {
+                "services": {
+                    "api": {"port": 9090},
+                }
+            },
+            "expected": {
+                "services": {
+                    "api": {"host": "localhost", "port": 9090},
+                    "worker": {"threads": 4},
+                }
+            },
         },
     ],
     2: [
         {
-            "title": "Multiple branches",
-            "base": {"app": {"cache": {"enabled": False}}, "version": 1},
-            "patch": {"app": {"cache": {"enabled": True, "ttl": 30}}, "version": 2},
-            "expected": {"app": {"cache": {"enabled": True, "ttl": 30}}, "version": 2},
+            "title": "Three level nesting",
+            "base": {
+                "app": {
+                    "cache": {"redis": {"host": "localhost"}},
+                    "db": {"primary": {"host": "db1"}},
+                }
+            },
+            "patch": {
+                "app": {
+                    "cache": {"redis": {"port": 6379}},
+                }
+            },
+            "expected": {
+                "app": {
+                    "cache": {"redis": {"host": "localhost", "port": 6379}},
+                    "db": {"primary": {"host": "db1"}},
+                }
+            },
         },
         {
-            "title": "Insert nested dict",
-            "base": {"services": {}},
-            "patch": {"services": {"payment": {"url": "https://pay"}}},
-            "expected": {"services": {"payment": {"url": "https://pay"}}},
+            "title": "Deep nested with list",
+            "base": {"app": {"middleware": {"stack": ["cors", "auth"]}}},
+            "patch": {"app": {"middleware": {"stack": ["auth", "cache"]}}},
+            "expected": {"app": {"middleware": {"stack": ["auth", "cache"]}}},
         },
     ],
     3: [
         {
-            "title": "Preserve unrelated keys",
-            "base": {"env": {"prod": {"region": "eu"}, "dev": {"region": "us"}}},
-            "patch": {"env": {"prod": {"region": "us", "replicas": 3}}},
+            "title": "Preserve unrelated nested keys",
+            "base": {
+                "env": {
+                    "prod": {"region": "eu", "size": "large"},
+                    "dev": {"region": "us"},
+                }
+            },
+            "patch": {
+                "env": {
+                    "prod": {"region": "us"},
+                }
+            },
             "expected": {
                 "env": {
-                    "prod": {"region": "us", "replicas": 3},
+                    "prod": {"region": "us", "size": "large"},
                     "dev": {"region": "us"},
                 }
             },
         },
         {
-            "title": "Replace primitive",
-            "base": {"feature": {"enabled": False}},
-            "patch": {"feature": {"enabled": True}},
-            "expected": {"feature": {"enabled": True}},
+            "title": "Add nested structure",
+            "base": {"features": {"logging": {"level": "info"}}},
+            "patch": {"features": {"analytics": {"enabled": True}}},
+            "expected": {
+                "features": {
+                    "logging": {"level": "info"},
+                    "analytics": {"enabled": True},
+                }
+            },
         },
     ],
 }
@@ -79,6 +121,17 @@ def _write_cases(project_root: Path, cases: List[Dict[str, object]]) -> None:
 def build_instance(run_id: str, base_tmp: Path | None = None) -> Dict[str, object]:
     base = base_tmp or _SANDBOX_BASE
     base.mkdir(parents=True, exist_ok=True)
+
+    # Clean up old sandbox directories if too many exist
+    if base.exists():
+        existing = sorted(base.glob("run_*"), key=lambda p: p.stat().st_mtime)
+        if len(existing) > 50:  # Keep only 50 most recent
+            for old_dir in existing[:-50]:
+                try:
+                    shutil.rmtree(old_dir)
+                except Exception:
+                    pass
+
     sandbox = base / f"run_{run_id}"
     if sandbox.exists():
         shutil.rmtree(sandbox)

@@ -4,7 +4,11 @@ import argparse
 import time
 from typing import List
 
+from dotenv import load_dotenv
 from tabulate import tabulate
+
+# Load environment variables from .env file
+load_dotenv()
 
 from config import (
     DEFAULT_MAX_TOKENS,
@@ -34,24 +38,41 @@ def main() -> None:
     else:
         task_names = list(TASK_REGISTRY.keys())
 
+    print(f"Starting evaluation: {args.runs} runs of tasks: {task_names}", flush=True)
     results = []
     for task_name in task_names:
         for run_index in range(args.runs):
-            result = run_task(
-                task_name,
-                run_index,
-                verbose=args.verbose,
-                model=args.model,
-                temperature=DEFAULT_TEMPERATURE,
-                top_p=DEFAULT_TOP_P,
-                max_tokens=DEFAULT_MAX_TOKENS,
-            )
-            results.append(result)
-            if args.verbose:
-                status = "PASS" if result.passed else "FAIL"
-                print(f"{task_name} run {run_index + 1}/{args.runs}: {status} reward={result.reward:.2f}")
+            start_time = time.time()
+            print(f"[{run_index + 1}/{args.runs}] Starting {task_name}...", end=" ", flush=True)
+            try:
+                result = run_task(
+                    task_name,
+                    run_index,
+                    verbose=args.verbose,
+                    model=args.model,
+                    temperature=DEFAULT_TEMPERATURE,
+                    top_p=DEFAULT_TOP_P,
+                    max_tokens=DEFAULT_MAX_TOKENS,
+                )
+                results.append(result)
+                elapsed = time.time() - start_time
+                status = "✓ PASS" if result.passed else "✗ FAIL"
+                print(f"{status} (reward={result.reward:.2f}, {elapsed:.1f}s)", flush=True)
+                if args.verbose:
+                    print(f"  Tokens: {result.input_tokens or 0} in, {result.output_tokens or 0} out", flush=True)
+            except KeyboardInterrupt:
+                print("\nInterrupted by user", flush=True)
+                raise
+            except Exception as e:
+                elapsed = time.time() - start_time
+                print(f"✗ ERROR ({elapsed:.1f}s): {type(e).__name__}: {str(e)[:80]}", flush=True)
+                # Continue with next run instead of failing completely
+
             if args.pause > 0 and run_index + 1 < args.runs:
                 time.sleep(args.pause)
+            elif run_index + 1 < args.runs:
+                # Always add small delay to avoid rate limits
+                time.sleep(0.5)
 
     grouped = group_by_task(results)
     table_rows = []

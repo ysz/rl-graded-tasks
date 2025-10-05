@@ -1,16 +1,18 @@
 You are inside a sandboxed copy of a small utility library (root path available via HPY_SANDBOX).
 
-Task: update project/merge/merge.py so that merge_dicts returns a brand new dictionary, performs a recursive merge on nested dicts, and copies primitives from patch without mutating base. Follow this recipe:
-- Start by copying base (e.g. using dict(base) or copy.deepcopy).
-- For each key in patch: if both sides are dicts, merge them recursively; otherwise replace the value.
-- Return the cloned result.
-Run pytest once your changes are in place and submit the diff only when it passes.
+Task: Fix project/merge/merge.py so merge_dicts returns a brand new dictionary that recursively merges nested dicts without mutating the base argument.
 
-Guidance:
-- Study project/tests/data/cases.json for the scenarios that must pass.
-- Modify project/merge/merge.py in place with a minimal diff.
-- Use the provided tools (file_read, file_write, run_pytests) to inspect the code and run the test suite.
-- When the tests succeed, submit a JSON envelope containing the unified diff under answer.patch. Leave passed=false if you are unsure.
+The current implementation has a bug where nested dictionary references might be shared between input and output, causing mutations. The issue is in how the base dictionary is copied before merging.
+
+Required format:
+{{"passed": false, "answer": {{"patch": "--- project/merge/merge.py\n+++ project/merge/merge.py\n@@ ...your patch here..."}}}}
+
+Notes:
+- Read project/merge/merge.py to understand the current implementation
+- You will need to fix how dictionaries are copied in the merge process
+- Consider what happens with nested dictionary structures
+- Patch format must work with patch -p0 (no a/ b/ prefixes)
+- Include enough context lines so patch can apply cleanly
 
 Sandbox snapshot:
 {layout_hint}

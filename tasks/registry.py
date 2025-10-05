@@ -69,7 +69,7 @@ TASK_REGISTRY: Dict[str, TaskSpec] = {
         grade=dict_grade,
         tools=("file_read", "file_write", "run_pytests"),
         max_steps=6,
-        max_tokens=600,
+        max_tokens=650,
     ),
     "logs_top5xx": TaskSpec(
         name="logs_top5xx",

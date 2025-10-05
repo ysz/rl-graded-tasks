@@ -92,12 +92,16 @@ def file_write(path: str, content: str) -> Dict[str, Any]:
 
 def run_pytests() -> Dict[str, Any]:
     sandbox = _get_sandbox_root()
+    # Set PYTHONDONTWRITEBYTECODE to prevent .pyc file creation
+    env = os.environ.copy()
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
     proc = subprocess.run(
-        ["pytest", "-q"],
+        ["pytest", "-q", "-p", "no:cacheprovider"],
         cwd=str(sandbox),
         capture_output=True,
         text=True,
         check=False,
+        env=env,
     )
     return {
         "returncode": int(proc.returncode),
