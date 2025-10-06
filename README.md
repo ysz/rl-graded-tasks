@@ -103,7 +103,9 @@ dependencies = [
 
 ## Evaluation Results
 
-**Model:** claude-3-5-haiku-latest
+**Model:** claude-3-5-haiku-latest (claude-3-5-haiku-20241022)
+**Pricing:** $0.80 per 1M input tokens, $4.00 per 1M output tokens (as of October 2025)
+**Evaluation date:** October 2025
 **Sampling settings:** temperature=0.3 (default), temperature=0.5 (swe_slugify_fix), temperature=0.8 (sql_q2_revenue), top_p=0.9
 **Runs per task:** 10
 
