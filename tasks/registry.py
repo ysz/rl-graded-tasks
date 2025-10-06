@@ -86,8 +86,9 @@ TASK_REGISTRY: Dict[str, TaskSpec] = {
         build_instance=sql_build_instance,
         grade=sql_grade,
         tools=("duckdb_sql", "file_read", "python_expression"),
-        max_steps=6,
-        max_tokens=700,
+        max_steps=4,
+        max_tokens=250,
+        temperature=0.8,
     ),
 }
 

@@ -7,12 +7,18 @@ The current implementation has a bug where nested dictionary references might be
 Required format:
 {{"passed": false, "answer": {{"patch": "--- project/merge/merge.py\n+++ project/merge/merge.py\n@@ ...your patch here..."}}}}
 
+Constraints:
+- DO NOT import any new modules (including copy, deepcopy, or similar)
+- The fix must use only built-in dict operations and recursion
+- All existing imports must remain unchanged
+
 Notes:
 - Read project/merge/merge.py to understand the current implementation
-- You will need to fix how dictionaries are copied in the merge process
-- Consider what happens with nested dictionary structures
+- You will need to manually handle deep copying of nested structures
+- The solution requires careful handling of both dict and non-dict values
 - Patch format must work with patch -p0 (no a/ b/ prefixes)
 - Include enough context lines so patch can apply cleanly
+- The key insight: use recursion to copy nested dictionaries
 
 Sandbox snapshot:
 {layout_hint}

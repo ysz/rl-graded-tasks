@@ -179,13 +179,16 @@ def grep_search(pattern: str, path: str, flags: Dict[str, Any] | None = None) ->
 def duckdb_sql(query: str) -> Dict[str, Any]:
     sandbox = _get_sandbox_root()
     con = duckdb.connect(database=":memory:")
+    cwd = os.getcwd()
     try:
+        os.chdir(sandbox)
         con.execute(f"SET temp_directory='{sandbox.as_posix()}';")
-        results = con.execute(query).fetchdf()
+        result = con.execute(query)
+        columns = [desc[0] for desc in result.description]
+        rows = result.fetchall()
     finally:
+        os.chdir(cwd)
         con.close()
-    columns = list(results.columns)
-    rows = results.values.tolist()
     return {"columns": columns, "rows": rows}
 
 

@@ -81,6 +81,10 @@ def grade(envelope: Any, sandbox_path: Path, metadata: Dict[str, Any]) -> GradeR
     if not isinstance(patch_text, str) or not patch_text.strip():
         return GradeResult(False, 0.0, {"error": "patch must be a non empty string"})
 
+    # Check for forbidden imports
+    if "import copy" in patch_text or "from copy" in patch_text:
+        return GradeResult(False, 0.0, {"error": "patch must not import copy module"})
+
     ok, message = _apply_patch(patch_text, sandbox_path)
     if not ok:
         return GradeResult(False, 0.0, {"error": "patch failed", "patch_output": message})

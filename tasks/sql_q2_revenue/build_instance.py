@@ -77,19 +77,10 @@ def _write_csv(path: Path, rows: List[Dict[str, object]]) -> None:
 
 
 def _write_readme(data_dir: Path) -> None:
-    note = """Steps (copy into duckdb_sql):
-CREATE OR REPLACE TABLE orders AS SELECT * FROM read_csv_auto('data/orders.csv');
-CREATE OR REPLACE TABLE products AS SELECT * FROM read_csv_auto('data/products.csv');
-CREATE OR REPLACE TABLE returns AS SELECT * FROM read_csv_auto('data/returns.csv');
-SELECT p.category,
-       ROUND(SUM(o.quantity * o.unit_price), 2) AS revenue
-FROM orders o
-JOIN products p ON o.product_id = p.product_id
-WHERE o.order_date BETWEEN '2023-04-01' AND '2023-06-30'
-  AND o.order_id NOT IN (SELECT order_id FROM returns)
-GROUP BY p.category
-ORDER BY revenue DESC
-LIMIT 3;
+    note = """Data files:
+- orders.csv: order_id, order_date, product_id, quantity, unit_price
+- products.csv: product_id, category
+- returns.csv: order_id
 """
     (data_dir / "README.txt").write_text(note, encoding="utf-8")
 
