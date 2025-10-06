@@ -5,6 +5,11 @@ from contextlib import redirect_stdout
 from io import StringIO
 from typing import Any, Callable, TypedDict
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from anthropic import Anthropic
 from anthropic._exceptions import OverloadedError
 from anthropic.types import MessageParam, ToolUnionParam
